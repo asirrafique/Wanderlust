@@ -32,7 +32,6 @@ app.get("/", (req, res) => {
     res.send("Hi, I am root");
 });
 
-
 //Index Route
 app.get("/listings", async (req, res) => {
   try {
@@ -58,6 +57,7 @@ app.get("/listings/:id", async (req, res) => {
 
 //Create Route
 app.post("/listings", async (req, res) => {
+    console.log("Form Data:", req.body);   
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     res.redirect("/listings");
