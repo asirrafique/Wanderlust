@@ -1,4 +1,4 @@
-console.log("Mapbox Token in Render:", process.env.MAP_TOKEN);
+console.log("Mapbox Token in Render:", process.env.MAPBOX_TOKEN);
 const Listing = require("../models/listing");
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 const mapToken = process.env.MAPBOX_TOKEN;
