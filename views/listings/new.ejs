@@ -5,7 +5,7 @@
       <h3>Create a New Listing</h3>
 
       <!-- Bootstrap custom validation form -->
-      <form method="POST" action="/listings" class="needs-validation" novalidate>
+      <form method="POST" action="/listings" class="needs-validation" novalidate enctype="multipart/form-data">
         <div class="mb-3">
           <label for="title" class="form-label">Title</label>
           <input name="listing[title]" type="text" class="form-control" id="title" placeholder="Add a catchy title"
@@ -24,8 +24,9 @@
         </div>
 
         <div class="mb-3">
-          <label for="image" class="form-label">Image Link</label>
-          <input type="text" name="listing[image]" id="image" class="form-control" placeholder="Enter image URL/Link" />
+          <label for="image" class="form-label">Upload Listing Image</label>
+          <input type="file" name="listing[image]" id="image" class="form-control" />
+          required
         </div>
 
         <div class="row">

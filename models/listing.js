@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const review = require("./review");
-const { ref } = require("joi");
+const { ref, required } = require("joi");
 const Schema = mongoose.Schema;
 const Review = require("./review.js");
 
@@ -11,15 +11,8 @@ const listingSchema = new Schema({
   },
   description: String,
   image: {
+    url: String,
     filename: String,
-    url: {
-      type: String,
-      default: "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1",
-      set: (v) =>
-        v === ""
-          ? "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1"
-          : v,
-    },
   },
   price: Number,
   location: String,
@@ -33,6 +26,17 @@ const listingSchema = new Schema({
   owner: {
     type: Schema.Types.ObjectId,
     ref: "User",
+  },
+  geometry: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      required: true,
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+    },
   },
 });
 
