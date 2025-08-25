@@ -22,17 +22,38 @@ const userRouter = require("./routes/user.js");
 
 const dbUrl = process.env.ATLASDB_URL;
 
-main()
-  .then(() => {
-    console.log("connected to DB");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+// ✅ MongoDB Connection (TLS safe for Atlas) with retry logic
+const MAX_RETRIES = 5;
+let retries = 0;
 
 async function main() {
-  await mongoose.connect(dbUrl);
+  const connectWithRetry = async () => {
+    try {
+      await mongoose.connect(dbUrl, {
+        serverSelectionTimeoutMS: 5000,
+        tlsAllowInvalidCertificates: false, // secure connection
+      });
+      console.log("✅ MongoDB connected successfully");
+    } catch (err) {
+      retries++;
+      console.error(
+        `❌ MongoDB connection error (Attempt ${retries}):`,
+        err.message
+      );
+      if (retries < MAX_RETRIES) {
+        console.log("🔄 Retrying in 5 seconds...");
+        setTimeout(connectWithRetry, 5000);
+      } else {
+        console.error(
+          "💥 Could not connect to MongoDB after multiple attempts."
+        );
+      }
+    }
+  };
+  connectWithRetry();
 }
+
+main();
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -41,6 +62,7 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+// ✅ MongoStore Session
 const store = MongoStore.create({
   mongoUrl: dbUrl,
   crypto: {
@@ -49,8 +71,8 @@ const store = MongoStore.create({
   touchAfter: 24 * 3600,
 });
 
-store.on("error", () => {
-  console.log("ERROR in MONGO SESSION STORE", err);
+store.on("error", (err) => {
+  console.log("❌ ERROR in MONGO SESSION STORE:", err);
 });
 
 const sessionOptions = {
@@ -65,10 +87,6 @@ const sessionOptions = {
   },
 };
 
-// app.get("/", (req, res) => {
-//   res.send("Hi, I am root");
-// });
-
 app.use(session(sessionOptions));
 app.use(flash());
 
@@ -79,36 +97,25 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+// ✅ Middleware: make variables available in all EJS views
 app.use((req, res, next) => {
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  res.locals.currUser = req.user;
+  res.locals.success = req.flash("success") || [];
+  res.locals.error = req.flash("error") || [];
+  res.locals.currUser = req.user || null;
   next();
 });
 
-// app.get("/demouser", async (req, res) => {
-//   let fakeUser = new User({
-//     email: "student@gmail.com",
-//     username: "delta-student",
-//   });
-
-//   let registeredUser = await User.register(fakeUser, "helloworld");
-//   res.send(registeredUser);
-// });
-
+// Routes
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
-// app.all("*", (req, res, next) => {
-// next(new ExpressError(404, "Page Not Found!"));
-// });
-
+// Error handler
 app.use((err, req, res, next) => {
-  let { statusCode = 500, message = "Something went wrong!" } = err;
+  const { statusCode = 500, message = "Something went wrong!" } = err;
   res.status(statusCode).render("error.ejs", { message });
 });
 
 app.listen(8080, () => {
-  console.log("server is listening to port 8080");
+  console.log("🚀 Server is listening on port 8080");
 });
