@@ -1,6 +1,7 @@
 if (process.env.NODE_ENV != "production") {
   require("dotenv").config();
 }
+console.log("Loaded Mapbox Token:", process.env.MAPBOX_TOKEN);
 
 const express = require("express");
 const app = express();
