@@ -6,10 +6,15 @@ It includes user authentication, hotel reviews & ratings, and interactive maps t
 🚀 Features
 
 🏨 Hotel Listings – Add, update, delete, and view hotels
+
 👤 User Authentication – Secure login & signup system
+
 ⭐ Reviews & Ratings – Users can review and rate hotels
+
 🗺️ Interactive Maps – Integrated maps to view hotel locations
+
 📂 MongoDB Storage – Listings, users, and reviews stored in MongoDB
+
 ⚡ RESTful APIs – Handles CRUD operations efficiently
 
 🛠️ Tech Stack
